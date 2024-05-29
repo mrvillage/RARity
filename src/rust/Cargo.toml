@@ -1,0 +1,13 @@
+[package]
+name = "rarity"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+name = "rarity"
+
+[dependencies]
+extendr-api = "*"
+lmutils = { version = "0.1", path = "../../../../lmutils" }
+rayon = "1.10.0"

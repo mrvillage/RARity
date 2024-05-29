@@ -6,7 +6,7 @@ An method for estimating the contribution of rare coding variants to complex tra
 
 ## Installation
 
-Requires the [Rust programming language](https://rust-lang.org) and the [GNU Scientific Library](https://www.gnu.org/software/gsl/). Helpful installation instructions for GSL can be found [here](https://docs.rs/GSL/7.0.0/rgsl/#installation).
+Requires the [Rust programming language](https://rust-lang.org).
 
 ```r
 devtools::install_github("mrvillage/RARity")

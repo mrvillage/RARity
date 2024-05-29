@@ -44,6 +44,7 @@ impl Results {
 /// `genes` is a list of character vectors, with the vector at index `i` containing the gene names
 /// for chromosome `i`.
 /// Returns a data frame with the results.
+/// @export
 #[extendr]
 pub fn rarity(dir: &str, phenos: &[Rstr], genes: List) -> Result<Robj> {
     let dir = std::path::Path::new(dir);

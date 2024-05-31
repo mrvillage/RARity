@@ -50,7 +50,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
 
     let genes = (1..=22)
         .map(|chr| {
-            let chr_dir = dir.join(format!("chr_{}", chr));
+            let chr_dir = dir.join(format!("chr_{:02}", chr));
             if std::fs::metadata(&chr_dir).is_ok() {
                 std::fs::read_dir(chr_dir)
                     .unwrap()

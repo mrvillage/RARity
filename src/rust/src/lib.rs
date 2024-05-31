@@ -41,24 +41,36 @@ impl Results {
 /// Run a RARity analysis.
 /// `dir` is the directory where the data is stored.
 /// `pheno_file` is a character vector of normalized phenotype file names, relative to `dir`.
-/// `genes` is a list of character vectors, with the vector at index `i` containing the gene names
 /// for chromosome `i`.
 /// Returns a data frame with the results.
 /// @export
 #[extendr]
-pub fn rarity(dir: &str, phenos: &[Rstr], genes: List) -> Result<Robj> {
+pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
     let dir = std::path::Path::new(dir);
-    let genes = genes
-        .iter()
-        .map(|(_, x)| x.as_string_vector())
-        .collect::<Option<Vec<_>>>();
-    if genes.is_none() {
-        return Err(Error::from("genes must be a list character vectors"));
-    }
-    let genes = genes.unwrap();
-    if genes.len() != 22 {
-        return Err(Error::from("genes must have 22 elements"));
-    }
+
+    let genes = (1..=22)
+        .map(|chr| {
+            let chr_dir = dir.join(format!("chr_{}", chr));
+            if std::fs::metadata(&chr_dir).is_ok() {
+                std::fs::read_dir(chr_dir)
+                    .unwrap()
+                    .filter_map(|x| x.ok())
+                    .map(|x| x.path())
+                    .filter(|x| x.is_file())
+                    .map(|x| {
+                        let file = lmutils::File::from_path(x.as_path())
+                            .unwrap()
+                            .into_matrix()
+                            .make_parallel_safe()
+                            .unwrap();
+                        (x, file)
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                vec![]
+            }
+        })
+        .collect::<Vec<_>>();
 
     let phenos = phenos
         .iter()
@@ -79,18 +91,22 @@ pub fn rarity(dir: &str, phenos: &[Rstr], genes: List) -> Result<Robj> {
         .for_each(|x| x.remove_column_by_name("eid"));
     let pheno_norm = phenos.iter().map(|x| x.as_mat_ref()).collect::<Vec<_>>();
     let results = genes
-        .par_iter()
+        .into_par_iter()
         .enumerate()
         .flat_map(|(chr, g)| {
             let chr = chr + 1;
             g.into_par_iter()
-                .filter_map(|gene| {
-                    let path = dir.join(format!("{}.rkyv.gz", gene));
+                .filter_map(|(path, mat)| {
+                    let gene = path
+                        .file_name()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .split('.')
+                        .next()
+                        .unwrap();
                     if std::fs::metadata(&path).is_ok() {
-                        let mut block: lmutils::OwnedMatrix<f64> = lmutils::File::from_path(path)
-                            .unwrap()
-                            .read_matrix(false)
-                            .unwrap();
+                        let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
                         block.remove_column_by_name("eid");
                         let block = block.into_matrix();
                         let block = block

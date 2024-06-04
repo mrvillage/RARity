@@ -136,11 +136,11 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                         let n = nb_individuals as f64;
                                         let m = nb_rvs as f64;
                                         let block_var_r2 = ((4.0 * r2)
-                                            * (1.0 - r2).powf(2.0)
-                                            * (n - m - 1.0).powf(2.0))
-                                            / ((n.powf(2.0) - 1.0) * (n + 3.0));
+                                            * (1.0 - r2).powi(2)
+                                            * (n - m - 1.0).powi(2))
+                                            / ((n.powi(2) - 1.0) * (n + 3.0));
                                         let block_var_adj_r2 =
-                                            ((n - 1.0) / (n - m - 1.0)).powf(2.0) * block_var_r2;
+                                            ((n - 1.0) / (n - m - 1.0)).powi(2) * block_var_r2;
                                         Results {
                                             trait_name: traits[i].to_string(),
                                             chr,

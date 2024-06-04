@@ -14,11 +14,10 @@ NULL
 #' Run a RARity analysis.
 #' `dir` is the directory where the data is stored.
 #' `pheno_file` is a character vector of normalized phenotype file names, relative to `dir`.
-#' `genes` is a list of character vectors, with the vector at index `i` containing the gene names
 #' for chromosome `i`.
 #' Returns a data frame with the results.
 #' @export
-rarity <- function(dir, phenos, genes) .Call(wrap__rarity, dir, phenos, genes)
+rarity <- function(dir, phenos) .Call(wrap__rarity, dir, phenos)
 
 
 # nolint end

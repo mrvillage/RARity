@@ -5,17 +5,15 @@
 \title{Run a RARity analysis.
 \code{dir} is the directory where the data is stored.
 \code{pheno_file} is a character vector of normalized phenotype file names, relative to \code{dir}.
-\code{genes} is a list of character vectors, with the vector at index \code{i} containing the gene names
 for chromosome \code{i}.
 Returns a data frame with the results.}
 \usage{
-rarity(dir, phenos, genes)
+rarity(dir, phenos)
 }
 \description{
 Run a RARity analysis.
 \code{dir} is the directory where the data is stored.
 \code{pheno_file} is a character vector of normalized phenotype file names, relative to \code{dir}.
-\code{genes} is a list of character vectors, with the vector at index \code{i} containing the gene names
 for chromosome \code{i}.
 Returns a data frame with the results.
 }

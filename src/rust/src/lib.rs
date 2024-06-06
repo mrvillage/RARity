@@ -125,6 +125,9 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
             chunk = vec![];
         }
     }
+    if !chunk.is_empty() {
+        chunks.push(chunk);
+    }
 
     let mut results = vec![];
     for chunk in chunks {

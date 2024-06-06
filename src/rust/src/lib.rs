@@ -1,3 +1,4 @@
+use core_affinity::CoreId;
 use extendr_api::prelude::*;
 use lmutils::{get_r2s, IntoMatrix, Transform};
 use log::{debug, info};
@@ -50,6 +51,14 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
     let _ =
         env_logger::Builder::from_env(env_logger::Env::default().filter_or("RARITY_LOG", "info"))
             .try_init();
+
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(rayon::max_num_threads())
+        .start_handler(|s| {
+            core_affinity::set_for_current(CoreId { id: s });
+        })
+        .build_global()
+        .unwrap();
 
     let dir = std::path::Path::new(dir);
 

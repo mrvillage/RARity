@@ -18,3 +18,4 @@ rayon = "1.10.0"
 log = "0.4.21"
 env_logger = "0.11.3"
 lmutils = { git = "https://github.com/mrvillage/lmutils.git" }
+core_affinity = "0.8.1"

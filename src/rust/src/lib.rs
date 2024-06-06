@@ -109,14 +109,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
             let chr = chr + 1;
             g.into_par_iter()
                 .filter_map(|(path, mat)| {
-                    let gene = path
-                        .file_name()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .split('.')
-                        .next()
-                        .unwrap();
+                    let gene = path.file_name().unwrap().to_str().unwrap();
                     info!("Processing gene {}", gene);
                     if std::fs::metadata(&path).is_ok() {
                         let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();

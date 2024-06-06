@@ -55,7 +55,9 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
     rayon::ThreadPoolBuilder::new()
         .num_threads(rayon::max_num_threads())
         .start_handler(|s| {
-            core_affinity::set_for_current(CoreId { id: s });
+            core_affinity::set_for_current(CoreId {
+                id: s % num_cpus::get(),
+            });
         })
         .build_global()
         .unwrap();

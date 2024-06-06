@@ -129,6 +129,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                             .par_iter()
                             .zip(&phenos)
                             .flat_map(|(pheno_norm, pheno)| {
+                                info!("Calculating R2 for gene {}", gene);
                                 let r2s = get_r2s(block, *pheno_norm);
                                 let nb_individuals = block.nrows();
                                 let nb_rvs = block.ncols();

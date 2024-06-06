@@ -107,34 +107,26 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
         .parse::<usize>()
         .unwrap();
 
-    let genes = genes
-        .into_par_iter()
-        .enumerate()
-        .flat_map(|(chr, g)| {
-            let chr = chr + 1;
-            g.into_par_iter().map(move |g| (chr, g.0, g.1))
-        })
-        .collect::<Vec<_>>();
+    let genes = std::sync::Mutex::new(
+        genes
+            .into_par_iter()
+            .enumerate()
+            .flat_map(|(chr, g)| {
+                let chr = chr + 1;
+                g.into_par_iter().map(move |g| (chr, g.0, g.1))
+            })
+            .collect::<Vec<_>>(),
+    );
 
-    let mut chunks = vec![];
-    let mut chunk = vec![];
-    for gene in genes {
-        chunk.push(gene);
-        if chunk.len() == blocks_per_chunk {
-            chunks.push(chunk);
-            chunk = vec![];
-        }
-    }
-    if !chunk.is_empty() {
-        chunks.push(chunk);
-    }
+    let results = std::sync::Mutex::new(vec![]);
 
-    let mut results = vec![];
-    for chunk in chunks {
-        results.par_extend(
-            chunk
-                .into_par_iter()
-                .filter_map(|(chr, path, mat)| {
+    std::thread::scope(|s| {
+        for _ in 0..blocks_per_chunk {
+            s.spawn(|| loop {
+                let mut genes = genes.lock().unwrap();
+                let gene = genes.pop();
+                drop(genes);
+                if let Some((chr, path, mat)) = gene {
                     let gene = path.file_name().unwrap().to_str().unwrap();
                     info!("Processing gene {}", gene);
                     if std::fs::metadata(&path).is_ok() {
@@ -151,9 +143,9 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                             .unwrap();
                         let block = block.as_mat_ref().unwrap();
                         if block.ncols() == 0 {
-                            return None;
+                            continue;
                         }
-                        let results = pheno_norm
+                        let res = pheno_norm
                             .par_iter()
                             .zip(&phenos)
                             .flat_map(|(pheno_norm, pheno)| {
@@ -189,20 +181,21 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                 })
                             })
                             .collect::<Vec<_>>();
+                        results.lock().unwrap().extend(res);
                         info!("Processed gene {}", gene);
-                        Some(results)
                     } else {
                         info!("Gene {} not found", gene);
-                        None
-                    }
-                })
-                .flatten(),
-        );
-    }
+                    };
+                } else {
+                    break;
+                }
+            });
+        }
+    });
 
     info!("Returning results");
 
-    Ok(Results::vec_to_df(results))
+    Ok(Results::vec_to_df(results.into_inner().unwrap()))
 }
 
 // Macro to generate exports.

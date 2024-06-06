@@ -127,65 +127,70 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                 let gene = genes.pop();
                 drop(genes);
                 if let Some((chr, path, mat)) = gene {
-                    let gene = path.file_name().unwrap().to_str().unwrap();
-                    info!("Processing gene {}", gene);
-                    if std::fs::metadata(&path).is_ok() {
-                        let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
-                        debug!("Removing eid column");
-                        block.remove_column_by_name("eid");
-                        let block = block.into_matrix();
-                        debug!("Normalizing block");
-                        let block = block
-                            .nan_to_mean()
-                            .min_sum(2.0)
-                            .standardization()
-                            .transform()
-                            .unwrap();
-                        let block = block.as_mat_ref().unwrap();
-                        if block.ncols() == 0 {
-                            continue;
-                        }
-                        let res = pheno_norm
-                            .par_iter()
-                            .zip(&phenos)
-                            .flat_map(|(pheno_norm, pheno)| {
-                                info!("Calculating R2 for gene {}", gene);
-                                let r2s = get_r2s(block, *pheno_norm);
-                                let nb_individuals = block.nrows();
-                                let nb_rvs = block.ncols();
-                                let traits = pheno.colnames().unwrap();
-                                r2s.into_par_iter().enumerate().map(move |(i, x)| {
-                                    // block_lcl_r2 and block_ucl_r2 are much more complicated to calculate so will not be returned and can be calculated easily in R with the ci.R2 function in MBESS
-                                    let r2 = x.r2();
-                                    let adj_r2 = x.adj_r2();
-                                    let adj_r2_per_var = adj_r2 / nb_rvs as f64;
-                                    let n = nb_individuals as f64;
-                                    let m = nb_rvs as f64;
-                                    let block_var_r2 =
-                                        ((4.0 * r2) * (1.0 - r2).powi(2) * (n - m - 1.0).powi(2))
-                                            / ((n.powi(2) - 1.0) * (n + 3.0));
-                                    let block_var_adj_r2 =
-                                        ((n - 1.0) / (n - m - 1.0)).powi(2) * block_var_r2;
-                                    Results {
-                                        trait_name: traits[i].to_string(),
-                                        chr,
-                                        gene: gene.to_string(),
-                                        nb_individuals,
-                                        nb_rvs,
-                                        r2,
-                                        adj_r2,
-                                        adj_r2_per_var,
-                                        block_var_r2,
-                                        block_var_adj_r2,
-                                    }
-                                })
-                            })
-                            .collect::<Vec<_>>();
-                        results.lock().unwrap().extend(res);
-                        info!("Processed gene {}", gene);
-                    } else {
-                        info!("Gene {} not found", gene);
-                    };
+                    rayon::scope(|s| {
+                        s.spawn(|_| {
+                            let gene = path.file_name().unwrap().to_str().unwrap();
+                            info!("Processing gene {}", gene);
+                            if std::fs::metadata(&path).is_ok() {
+                                let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
+                                debug!("Removing eid column");
+                                block.remove_column_by_name("eid");
+                                let block = block.into_matrix();
+                                debug!("Normalizing block");
+                                let block = block
+                                    .nan_to_mean()
+                                    .min_sum(2.0)
+                                    .standardization()
+                                    .transform()
+                                    .unwrap();
+                                let block = block.as_mat_ref().unwrap();
+                                if block.ncols() == 0 {
+                                    return;
+                                }
+                                let res = pheno_norm
+                                    .par_iter()
+                                    .zip(&phenos)
+                                    .flat_map(|(pheno_norm, pheno)| {
+                                        info!("Calculating R2 for gene {}", gene);
+                                        let r2s = get_r2s(block, *pheno_norm);
+                                        let nb_individuals = block.nrows();
+                                        let nb_rvs = block.ncols();
+                                        let traits = pheno.colnames().unwrap();
+                                        r2s.into_par_iter().enumerate().map(move |(i, x)| {
+                                            // block_lcl_r2 and block_ucl_r2 are much more complicated to calculate so will not be returned and can be calculated easily in R with the ci.R2 function in MBESS
+                                            let r2 = x.r2();
+                                            let adj_r2 = x.adj_r2();
+                                            let adj_r2_per_var = adj_r2 / nb_rvs as f64;
+                                            let n = nb_individuals as f64;
+                                            let m = nb_rvs as f64;
+                                            let block_var_r2 = ((4.0 * r2)
+                                                * (1.0 - r2).powi(2)
+                                                * (n - m - 1.0).powi(2))
+                                                / ((n.powi(2) - 1.0) * (n + 3.0));
+                                            let block_var_adj_r2 =
+                                                ((n - 1.0) / (n - m - 1.0)).powi(2) * block_var_r2;
+                                            Results {
+                                                trait_name: traits[i].to_string(),
+                                                chr,
+                                                gene: gene.to_string(),
+                                                nb_individuals,
+                                                nb_rvs,
+                                                r2,
+                                                adj_r2,
+                                                adj_r2_per_var,
+                                                block_var_r2,
+                                                block_var_adj_r2,
+                                            }
+                                        })
+                                    })
+                                    .collect::<Vec<_>>();
+                                results.lock().unwrap().extend(res);
+                                info!("Processed gene {}", gene);
+                            } else {
+                                info!("Gene {} not found", gene);
+                            };
+                        })
+                    });
                 } else {
                     break;
                 }

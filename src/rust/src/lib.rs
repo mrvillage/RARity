@@ -102,13 +102,36 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
 
     info!("Calculating RARity");
 
-    let results = genes
+    let blocks_per_chunk = std::env::var("RARITY_BLOCKS_PER_CHUNK")
+        .unwrap_or("64".to_string())
+        .parse::<usize>()
+        .unwrap();
+
+    let genes = genes
         .into_par_iter()
         .enumerate()
         .flat_map(|(chr, g)| {
             let chr = chr + 1;
-            g.into_par_iter()
-                .filter_map(|(path, mat)| {
+            g.into_par_iter().map(move |g| (chr, g.0, g.1))
+        })
+        .collect::<Vec<_>>();
+
+    let mut chunks = vec![];
+    let mut chunk = vec![];
+    for gene in genes {
+        chunk.push(gene);
+        if chunk.len() == blocks_per_chunk {
+            chunks.push(chunk);
+            chunk = vec![];
+        }
+    }
+
+    let mut results = vec![];
+    for chunk in chunks {
+        results.par_extend(
+            chunk
+                .into_par_iter()
+                .filter_map(|(chr, path, mat)| {
                     let gene = path.file_name().unwrap().to_str().unwrap();
                     info!("Processing gene {}", gene);
                     if std::fs::metadata(&path).is_ok() {
@@ -168,10 +191,9 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                         None
                     }
                 })
-                .flatten()
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
+                .flatten(),
+        );
+    }
 
     info!("Returning results");
 

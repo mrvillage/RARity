@@ -53,8 +53,14 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
             .try_init();
 
     rayon::ThreadPoolBuilder::new()
-        .num_threads(rayon::max_num_threads())
+        .num_threads(
+            std::env::var("RAYON_NUM_THREADS")
+                .unwrap_or_else(|_| num_cpus::get().to_string())
+                .parse::<usize>()
+                .unwrap(),
+        )
         .start_handler(|s| {
+            println!("Starting thread {}", s);
             core_affinity::set_for_current(CoreId {
                 id: s % num_cpus::get(),
             });

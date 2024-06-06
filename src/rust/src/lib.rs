@@ -1,6 +1,6 @@
 use extendr_api::prelude::*;
 use lmutils::{get_r2s, IntoMatrix, Transform};
-use log::info;
+use log::{debug, info};
 use rayon::prelude::*;
 
 struct Results {
@@ -136,8 +136,10 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                     info!("Processing gene {}", gene);
                     if std::fs::metadata(&path).is_ok() {
                         let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
+                        debug!("Removing eid column");
                         block.remove_column_by_name("eid");
                         let block = block.into_matrix();
+                        debug!("Normalizing block");
                         let block = block
                             .nan_to_mean()
                             .min_sum(2.0)

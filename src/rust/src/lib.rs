@@ -119,7 +119,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
     info!("Calculating RARity");
 
     let blocks_per_chunk = std::env::var("RARITY_BLOCKS_PER_CHUNK")
-        .unwrap_or("64".to_string())
+        .unwrap_or("16".to_string())
         .parse::<usize>()
         .unwrap();
 

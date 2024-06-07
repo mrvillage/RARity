@@ -25,3 +25,8 @@ The main function is `rarity::rarity`.
 ```r
 rarity::rarity("data_dir", c("phenos1.rkyv.gz", "phenos2.rkyv.gz"))
 ```
+
+RARity also reads three environment variables:
+- `RARITY_LOG` to set the log level (default: `info`).
+- `RARITY_BLOCKS_PER_CHUNK` to set the number of blocks to process in parallel (default: `16`).
+- `RAYON_NUM_THREADS` to set the number of threads to use (default: `num_cpus::get()`).

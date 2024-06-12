@@ -111,9 +111,10 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
         .into_par_iter()
         .map(|x| x.to_owned().unwrap())
         .collect::<Vec<_>>();
-    phenos
-        .iter_mut()
-        .for_each(|x| x.remove_column_by_name("eid"));
+    phenos.iter_mut().for_each(|x| {
+        x.remove_column_by_name_if_exists("eid");
+        x.remove_column_by_name_if_exists("IID");
+    });
     let pheno_norm = phenos.iter().map(|x| x.as_mat_ref()).collect::<Vec<_>>();
 
     info!("Calculating RARity");
@@ -150,7 +151,8 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                             if std::fs::metadata(&path).is_ok() {
                                 let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
                                 debug!("Removing eid column");
-                                block.remove_column_by_name("eid");
+                                block.remove_column_by_name_if_exists("eid");
+                                block.remove_column_by_name_if_exists("IID");
                                 let block = block.into_matrix();
                                 debug!("Normalizing block");
                                 let block = block

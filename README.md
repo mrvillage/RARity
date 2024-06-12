@@ -19,7 +19,7 @@ install.packages("https://github.com/mrvillage/rarity/archive/refs/heads/master.
 The main function is `rarity::rarity`.
 - The first argument is the directory where the data is stored.
 - The second argument is a vector of the names of the phenotype files.
-- The function then returns a data frame with columns `trait_name`, `chr`, `gene`, `nb_individuals`, `nb_rvs`, `r2`, `adj_r2`, `adj_r2_per_var`, `block_var_r2`, `block_var_adj_r2`.
+- The function then returns a data frame with columns `pheno_file`, `trait_name`, `chr`, `gene`, `nb_individuals`, `nb_rvs`, `r2`, `adj_r2`, `adj_r2_per_var`, `block_var_r2`, `block_var_adj_r2`.
 - The function expects directories with the format `chr_01` to `chr_22` corresponding to each chromosome. If a chromosome is missing, the function will ignore it. Each file within the folder is read as a gene block.
 - Using `.RData` files is supported but STRONGLY discouraged as they cannot be loaded in parallel or in chunks so will all be loaded in sequence at the very beginning of execution. This will likely result in RAM issues for large datasets and will be significantly slower than other file types. The recommended file type is `.rkyv.gz` which is a compressed binary format that can be read in parallel and in chunks. For converting, see the functions available in [`lmutils.r`](https://github.com/mrvillage/lmutils.r).
 

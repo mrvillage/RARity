@@ -1,10 +1,10 @@
-use core_affinity::CoreId;
 use extendr_api::prelude::*;
 use lmutils::{get_r2s, IntoMatrix, Transform};
 use log::{debug, info};
 use rayon::prelude::*;
 
 struct Results {
+    pheno_file: String,
     trait_name: String,
     chr: usize,
     gene: String,
@@ -20,6 +20,10 @@ struct Results {
 impl Results {
     fn vec_to_df(results: Vec<Results>) -> Robj {
         data_frame!(
+            pheno_file = results
+                .iter()
+                .map(|x| x.pheno_file.clone())
+                .collect::<Vec<_>>(),
             trait_name = results
                 .iter()
                 .map(|x| x.trait_name.clone())
@@ -52,21 +56,6 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
         env_logger::Builder::from_env(env_logger::Env::default().filter_or("RARITY_LOG", "info"))
             .try_init();
 
-    // rayon::ThreadPoolBuilder::new()
-    //     .num_threads(
-    //         std::env::var("RAYON_NUM_THREADS")
-    //             .unwrap_or_else(|_| num_cpus::get().to_string())
-    //             .parse::<usize>()
-    //             .unwrap(),
-    //     )
-    //     .start_handler(|s| {
-    //         core_affinity::set_for_current(CoreId {
-    //             id: s % num_cpus::get(),
-    //         });
-    //     })
-    //     .build_global()
-    //     .unwrap();
-
     let dir = std::path::Path::new(dir);
 
     info!("Reading data from {}", dir.display());
@@ -97,6 +86,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
 
     info!("Reading phenotypes");
 
+    let pheno_files = phenos.iter().map(|x| x.to_string()).collect::<Vec<_>>();
     let phenos = phenos
         .iter()
         .map(|x| {
@@ -168,7 +158,8 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                 let res = pheno_norm
                                     .par_iter()
                                     .zip(&phenos)
-                                    .flat_map(|(pheno_norm, pheno)| {
+                                    .zip(&pheno_files)
+                                    .flat_map(|((pheno_norm, pheno), pheno_file)| {
                                         info!("Calculating R2 for gene {}", gene);
                                         let r2s = get_r2s(block, *pheno_norm);
                                         let nb_individuals = block.nrows();
@@ -188,6 +179,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                             let block_var_adj_r2 =
                                                 ((n - 1.0) / (n - m - 1.0)).powi(2) * block_var_r2;
                                             Results {
+                                                pheno_file: pheno_file.to_string(),
                                                 trait_name: traits[i].to_string(),
                                                 chr,
                                                 gene: gene.to_string(),

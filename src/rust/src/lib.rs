@@ -147,11 +147,11 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                             info!("Processing gene {}", gene);
                             if std::fs::metadata(&path).is_ok() {
                                 let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
-                                debug!("Removing eid column");
                                 if block.cols() != nrows {
-                                    error!("Block {gene} has different number of rows than phenotypes, expected: {}, found: {}", nrows, block.rows());
+                                    error!("Block {gene} has different number of rows than phenotypes, expected {}, found {}", nrows, block.rows());
                                     return;
                                 }
+                                debug!("Removing eid column");
                                 block.remove_column_by_name_if_exists("eid");
                                 block.remove_column_by_name_if_exists("IID");
                                 let block = block.into_matrix();

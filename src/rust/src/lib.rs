@@ -109,11 +109,6 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
 
     info!("Calculating RARity");
 
-    let blocks_per_chunk = std::env::var("RARITY_BLOCKS_PER_CHUNK")
-        .unwrap_or("16".to_string())
-        .parse::<usize>()
-        .unwrap();
-
     let genes = std::sync::Mutex::new(
         genes
             .into_par_iter()
@@ -124,6 +119,12 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
             })
             .collect::<Vec<_>>(),
     );
+
+    let blocks_per_chunk = std::env::var("RARITY_BLOCKS_PER_CHUNK")
+        .unwrap_or("16".to_string())
+        .parse::<usize>()
+        .unwrap()
+        .clamp(1, genes.lock().unwrap().len());
 
     let results = std::sync::Mutex::new(vec![]);
 

@@ -1,6 +1,6 @@
 use extendr_api::prelude::*;
 use lmutils::{get_r2s, IntoMatrix, Transform};
-use log::{debug, info};
+use log::{debug, error, info};
 use rayon::prelude::*;
 
 struct Results {
@@ -105,6 +105,14 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
         x.remove_column_by_name_if_exists("eid");
         x.remove_column_by_name_if_exists("IID");
     });
+    let ncols = phenos[0].cols();
+    for pheno in phenos.iter() {
+        if pheno.cols() != ncols {
+            return Err(Error::from(
+                "Phenotypes must have the same number of columns",
+            ));
+        }
+    }
     let pheno_norm = phenos.iter().map(|x| x.as_mat_ref()).collect::<Vec<_>>();
 
     info!("Calculating RARity");
@@ -142,6 +150,10 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                             if std::fs::metadata(&path).is_ok() {
                                 let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
                                 debug!("Removing eid column");
+                                if block.cols() != ncols {
+                                    error!("Block {gene} has different number of columns than phenotypes: {} != {}", block.cols(), ncols);
+                                    return;
+                                }
                                 block.remove_column_by_name_if_exists("eid");
                                 block.remove_column_by_name_if_exists("IID");
                                 let block = block.into_matrix();

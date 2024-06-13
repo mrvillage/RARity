@@ -19,5 +19,20 @@ NULL
 #' @export
 rarity <- function(dir, phenos) .Call(wrap__rarity, dir, phenos)
 
+#' Set the log level.
+#' `level` is the log level.
+#' @export
+set_log_level <- function(level) invisible(.Call(wrap__set_log_level, level))
+
+#' Set the number of blocks per chunk.
+#' `blocks_per_chunk` is the number of blocks per chunk.
+#' @export
+set_blocks_per_chunk <- function(blocks_per_chunk) invisible(.Call(wrap__set_blocks_per_chunk, blocks_per_chunk))
+
+#' Set the number of threads.
+#' `num_threads` is the number of threads.
+#' @export
+set_num_threads <- function(num_threads) invisible(.Call(wrap__set_num_threads, num_threads))
+
 
 # nolint end

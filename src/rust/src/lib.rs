@@ -224,10 +224,37 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
     Ok(Results::vec_to_df(results.into_inner().unwrap()))
 }
 
+/// Set the log level.
+/// `level` is the log level.
+/// @export
+#[extendr]
+pub fn set_log_level(level: &str) {
+    std::env::set_var("RARITY_LOG", level);
+}
+
+/// Set the number of blocks per chunk.
+/// `blocks_per_chunk` is the number of blocks per chunk.
+/// @export
+#[extendr]
+pub fn set_blocks_per_chunk(blocks_per_chunk: u32) {
+    std::env::set_var("RARITY_BLOCKS_PER_CHUNK", blocks_per_chunk.to_string());
+}
+
+/// Set the number of threads.
+/// `num_threads` is the number of threads.
+/// @export
+#[extendr]
+pub fn set_num_threads(num_threads: u32) {
+    std::env::set_var("RAYON_NUM_THREADS", num_threads.to_string());
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod rarity;
     fn rarity;
+    fn set_log_level;
+    fn set_blocks_per_chunk;
+    fn set_num_threads;
 }

@@ -151,7 +151,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                 let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
                                 debug!("Removing eid column");
                                 if block.cols() != ncols {
-                                    error!("Block {gene} has different number of columns than phenotypes: {} != {}", block.cols(), ncols);
+                                    error!("Block {gene} has different number of columns than phenotypes, expected: {}, found: {}",ncols, block.cols());
                                     return;
                                 }
                                 block.remove_column_by_name_if_exists("eid");

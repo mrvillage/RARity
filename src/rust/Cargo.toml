@@ -14,7 +14,7 @@ name = "rarity"
 extendr-api = "0.6.0"
 rayon = "1.10.0"
 # lmutils = { version = "0.1", path = "../../../../lmutils" }
-# lmutils = "0.1"
+lmutils = "0.1"
 log = "0.4.21"
 env_logger = "0.11.3"
-lmutils = { git = "https://github.com/mrvillage/lmutils.git" }
+# lmutils = { git = "https://github.com/mrvillage/lmutils.git" }

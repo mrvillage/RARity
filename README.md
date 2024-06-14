@@ -27,8 +27,10 @@ The main function is `rarity::rarity`.
 rarity::rarity("data_dir", c("phenos1.rkyv.gz", "phenos2.rkyv.gz"))
 ```
 
-RARity also reads three environment variables:
-- `RARITY_LOG` to set the log level (default: `info`).
-- `RARITY_BLOCKS_PER_CHUNK` to set the number of blocks to process in parallel (default: `16`).
-- `RAYON_NUM_THREADS` to set the number of threads to use (default: `num_cpus::get()`).
-These variables can be set in bash using `export VAR=value`, in R using `Sys.setenv(VAR=value)` or using `rarity::set_log_level`, `rarity::set_blocks_per_chunk` and `rarity::set_num_threads`.
+## Configuration
+
+RARity exposes three global config options that can be set using environment variables or the `rarity` package functions:
+
+- `RARITY_LOG`/`rarity::set_log_level` to set the log level (default: `info`).
+- `RARITY_BLOCKS_PER_CHUNK`/`rarity::set_blocks_per_chunk` to set the number of blocks to process in parallel (default: `16`).
+- `RAYON_NUM_THREADS`/`rarity::set_num_threads` to set the number of threads to use (default: `num_cpus::get()`).

@@ -60,9 +60,13 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
 
     info!("Reading data from {}", dir.display());
 
-    let genes = (1..=22)
+    let genes = (0..=22)
         .map(|chr| {
-            let chr_dir = dir.join(format!("chr_{:02}", chr));
+            let chr_dir = if chr == 0 {
+                dir.to_owned()
+            } else {
+                dir.join(format!("chr_{:02}", chr))
+            };
             if std::fs::metadata(&chr_dir).is_ok() {
                 std::fs::read_dir(chr_dir)
                     .unwrap()

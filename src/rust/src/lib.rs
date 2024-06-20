@@ -147,7 +147,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                             info!("Processing gene {}", gene);
                             if std::fs::metadata(&path).is_ok() {
                                 let mut block: lmutils::OwnedMatrix<f64> = mat.to_owned().unwrap();
-                                if block.cols() != nrows {
+                                if block.rows() != nrows {
                                     error!("Block {gene} has different number of rows than phenotypes, expected {}, found {}", nrows, block.rows());
                                     return;
                                 }

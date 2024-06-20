@@ -112,6 +112,14 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
         }
     }
     let pheno_norm = phenos.iter().map(|x| x.as_mat_ref()).collect::<Vec<_>>();
+    let traits = phenos
+        .iter()
+        .map(|x| {
+            x.colnames()
+                .map(|x| x.to_vec())
+                .unwrap_or_else(|| (1..=x.cols()).map(|x| x.to_string()).collect::<Vec<_>>())
+        })
+        .collect::<Vec<_>>();
 
     info!("Calculating RARity");
 
@@ -168,14 +176,13 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                 }
                                 let res = pheno_norm
                                     .par_iter()
-                                    .zip(&phenos)
                                     .zip(&pheno_files)
-                                    .flat_map(|((pheno_norm, pheno), pheno_file)| {
+                                    .zip(&traits)
+                                    .flat_map(|((pheno_norm, pheno_file), traits)| {
                                         info!("Calculating R2 for gene {}", gene);
                                         let r2s = get_r2s(block, *pheno_norm);
                                         let nb_individuals = block.nrows();
                                         let nb_rvs = block.ncols();
-                                        let traits = pheno.colnames().unwrap();
                                         r2s.into_par_iter().enumerate().map(move |(i, x)| {
                                             // block_lcl_r2 and block_ucl_r2 are much more complicated to calculate so will not be returned and can be calculated easily in R with the ci.R2 function in MBESS
                                             let r2 = x.r2();

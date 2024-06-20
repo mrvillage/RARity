@@ -8,6 +8,12 @@ An method for estimating the contribution of rare coding variants to complex tra
 
 Requires the [Rust programming language](https://rust-lang.org).
 
+```sh 
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+Then install the package using the following command:
+
 ```r
 devtools::install_github("mrvillage/RARity")
 # OR

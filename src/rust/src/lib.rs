@@ -114,6 +114,9 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
         if pheno.rows() != nrows {
             return Err(Error::from("Phenotypes must have the same number of rows"));
         }
+        if pheno.data().par_iter().any(|x| x.is_nan()) {
+            return Err(Error::from("Phenotypes must not contain NaN values"));
+        }
     }
     let pheno_norm = phenos.iter().map(|x| x.as_mat_ref()).collect::<Vec<_>>();
     let traits = phenos

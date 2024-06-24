@@ -657,9 +657,9 @@ checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 
 [[package]]
 name = "lmutils"
-version = "0.1.21"
+version = "0.1.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2027bc492fedaa61cfab47a9c3dab4d7ed255209ee2276aeae2bd77b725e0f0d"
+checksum = "5599d32ca8fd6359c8a21f248cbfb937c30e9209b3444c5cc02d3872f956f4d4"
 dependencies = [
  "csv",
  "extendr-api",

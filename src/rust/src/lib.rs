@@ -101,14 +101,10 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                 .unwrap()
         })
         .collect::<Vec<_>>();
-    let mut phenos = phenos
+    let phenos = phenos
         .into_par_iter()
         .map(|x| x.to_owned().unwrap())
         .collect::<Vec<_>>();
-    phenos.iter_mut().for_each(|x| {
-        x.remove_column_by_name_if_exists("eid");
-        x.remove_column_by_name_if_exists("IID");
-    });
     let nrows = phenos[0].rows();
     for pheno in phenos.iter() {
         if pheno.rows() != nrows {
@@ -118,6 +114,19 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
             return Err(Error::from("Phenotypes must not contain NaN values"));
         }
     }
+    let phenos = phenos
+        .into_par_iter()
+        .map(|mut x| {
+            x.remove_column_by_name_if_exists("eid");
+            x.remove_column_by_name_if_exists("IID");
+            x.into_matrix()
+                .standardization()
+                .transform()
+                .unwrap()
+                .to_owned()
+                .unwrap()
+        })
+        .collect::<Vec<_>>();
     let pheno_norm = phenos.iter().map(|x| x.as_mat_ref()).collect::<Vec<_>>();
     let traits = phenos
         .iter()

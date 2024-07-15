@@ -158,6 +158,11 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
 
     let results = std::sync::Mutex::new(vec![]);
 
+    let min_sum = std::env::var("RARITY_MIN_SUM")
+        .unwrap_or("2.0".to_string())
+        .parse::<f64>()
+        .unwrap();
+
     std::thread::scope(|s| {
         for _ in 0..blocks_per_chunk {
             s.spawn(|| loop {
@@ -182,7 +187,7 @@ pub fn rarity(dir: &str, phenos: &[Rstr]) -> Result<Robj> {
                                 debug!("Normalizing block");
                                 let block = block
                                     .nan_to_mean()
-                                    .min_sum(2.0)
+                                    .min_sum(min_sum)
                                     .standardization()
                                     .transform()
                                     .unwrap();
@@ -271,6 +276,14 @@ pub fn set_num_threads(num_threads: u32) {
     std::env::set_var("RAYON_NUM_THREADS", num_threads.to_string());
 }
 
+/// Set the min sum for the RARity analysis.
+/// `min_sum` is the min sum.
+/// @export
+#[extendr]
+pub fn set_min_sum(min_sum: f64) {
+    std::env::set_var("RARITY_MIN_SUM", min_sum.to_string());
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -280,4 +293,5 @@ extendr_module! {
     fn set_log_level;
     fn set_blocks_per_chunk;
     fn set_num_threads;
+    fn set_min_sum;
 }

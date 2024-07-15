@@ -40,3 +40,4 @@ RARity exposes three global config options that can be set using environment var
 - `RARITY_LOG`/`rarity::set_log_level` to set the log level (default: `info`).
 - `RARITY_BLOCKS_PER_CHUNK`/`rarity::set_blocks_per_chunk` to set the number of blocks to process in parallel (default: `16`).
 - `RAYON_NUM_THREADS`/`rarity::set_num_threads` to set the number of threads to use (default: `num_cpus::get()`).
+- `RARITY_MIN_SUM`/`rarity::set_min_sum` to set the minimum sum of gene block columns to consider a gene block (default: `2.0`).

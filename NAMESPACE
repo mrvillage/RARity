@@ -3,5 +3,6 @@
 export(rarity)
 export(set_blocks_per_chunk)
 export(set_log_level)
+export(set_min_sum)
 export(set_num_threads)
 useDynLib(rarity, .registration = TRUE)

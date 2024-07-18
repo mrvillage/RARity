@@ -34,5 +34,10 @@ set_blocks_per_chunk <- function(blocks_per_chunk) invisible(.Call(wrap__set_blo
 #' @export
 set_num_threads <- function(num_threads) invisible(.Call(wrap__set_num_threads, num_threads))
 
+#' Set the min sum for the RARity analysis.
+#' `min_sum` is the min sum.
+#' @export
+set_min_sum <- function(min_sum) invisible(.Call(wrap__set_min_sum, min_sum))
+
 
 # nolint end
